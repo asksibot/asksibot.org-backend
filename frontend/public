@@ -1,1 +1,19 @@
 # Public assets like HTML entry point
+server {
+    listen 80;
+    server_name www.asksibot.org;
+    return 301 $scheme://asksibot.org$request_uri;
+}
+
+server {
+    listen 80;
+    server_name asksibot.org;
+
+    root /path/to/your/frontend/public;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+
