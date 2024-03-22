@@ -1,3 +1,5 @@
+#Initialize Flask app and bring together other components
+
 Initializes your Flask app and brings together other components
 from flask import Flask
 
