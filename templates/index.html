@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> //Part 1: Head and Initial Body remains largely unchanged but sets the stage for adding more dynamic content handling in the script. 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -18,11 +18,9 @@
             width: 50%;
             margin-top: 20px;
         }
-        /* New style for .small-text goes here */
         .small-text {
-            font-size: 0.8em; /* Makes the text smaller */
+            font-size: 0.8em;
         }
-        /* Continue with other styles after this */
         .chat-area {
             margin-top: 20px;
             text-align: left;
@@ -50,24 +48,22 @@
             padding: 10px;
         }
         .input-container button {
-    padding: 10px 20px;
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    margin-left: 10px; /* Default margin */
-}
-
-@media (max-width: 600px) {
-    .input-container button {
-        margin-left: 5px; /* Smaller margin for small devices */
-    }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        @media (max-width: 600px) {
+            .input-container button {
+                margin-left: 5px;
+            }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         .message-anim {
             animation: fadeIn 0.5s ease-out;
         }
@@ -80,9 +76,14 @@
         <h1>Asksibot</h1>
         <p>Developed on OpenAI by Christopher Horne, OTR/L</p>
     </div>
-    <div class="chat-area" id="chatArea"></div>
+    <!-- Part 2 Placeholder for next part -->
+       <!-- Input area for text and image generation -->
     <div class="input-container">
-        <input type="text" id="userMessageInput" placeholder="Ask Asksibot a question..." autocomplete="off">
+        <input type="text" id="userMessageInput" placeholder="Ask Asksibot a question or request an image..." autocomplete="off">
+        <select id="promptType">
+            <option value="text">Text</option>
+            <option value="image">Image</option>
+        </select>
         <button id="sendMessageButton">Send</button>
     </div>
     <div class="footer">
@@ -91,6 +92,8 @@
     </div>
     <button id="showFeedbackForm" style="margin-top: 20px;">Feedback</button>
 </div>
+
+<!-- Initial script setup -->
 <script>
     document.getElementById('showFeedbackForm').addEventListener('click', function() {
         window.location.href = 'feedback_form.html';
@@ -98,29 +101,18 @@
 
     document.getElementById('sendMessageButton').addEventListener('click', async function() {
         const userMessage = document.getElementById('userMessageInput').value;
+        const promptType = document.getElementById('promptType').value;
+
         if (!userMessage.trim()) return;
+
+        // Append the user message to the chat area
         appendMessage('You', userMessage, 'user-message');
 
-        try {
-            const response = await fetch('/chatbot', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ message: userMessage })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const botResponse = data.bot_response;
-                appendMessage('Bot', botResponse, 'bot-message');
-            } else {
-                console.error('Error:', response.statusText);
-                // Optionally, display an error message to the user
-            }
-        } catch (error) {
-            console.error('Fetch error:', error);
-            // Optionally, display an error message to the user
+        // Check if it's a text or image prompt and handle accordingly
+        if (promptType === 'text') {
+            handleTextPrompt(userMessage);
+        } else if (promptType === 'image') {
+            handleImagePrompt(userMessage);
         }
 
         // Clear the input field
@@ -142,6 +134,69 @@
         chatArea.appendChild(messageElement);
         chatArea.scrollTop = chatArea.scrollHeight;
     }
+
+    // Placeholder for handleTextPrompt and handleImagePrompt functions
+ 
+    // Existing setup and functions remain unchanged
+
+    async function handleTextPrompt(userMessage) {
+        try {
+            const response = await fetch('/chatbot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: userMessage })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const botResponse = data.bot_response;
+                appendMessage('Bot', botResponse, 'bot-message');
+            } else {
+                console.error('Error:', response.statusText);
+                appendMessage('Bot', 'Sorry, I am having trouble understanding that.', 'bot-message');
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            appendMessage('Bot', 'Sorry, I am having trouble understanding that.', 'bot-message');
+        }
+    }
+
+    async function handleImagePrompt(prompt) {
+        try {
+            const response = await fetch('/generate-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: prompt })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const imageUrl = data.image_url;
+                appendImage(imageUrl);
+            } else {
+                console.error('Error:', response.statusText);
+                appendMessage('Bot', 'Failed to generate image.', 'bot-message');
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            appendMessage('Bot', 'Failed to generate image.', 'bot-message');
+        }
+    }
+
+    function appendImage(imageUrl) {
+        const chatArea = document.getElementById('chatArea');
+        const imageElement = document.createElement('img');
+        imageElement.src = imageUrl;
+        imageElement.style.maxWidth = '100%';
+        imageElement.classList.add('message-anim');
+        chatArea.appendChild(imageElement);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }   
 </script>
 </body>
 </html>
+ 

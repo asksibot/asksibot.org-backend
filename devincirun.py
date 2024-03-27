@@ -1,9 +1,8 @@
 from flask import Flask, render_template, request, jsonify
-from config import Config  # Ensure Config is properly imported
+from config import create_app
 
 # Initialize Flask application
-app = Flask(__name__)
-app.config.from_object(Config)
+app = create_app()
 
 @app.route('/')
 def home():
@@ -11,26 +10,25 @@ def home():
 
 @app.route('/chatbot', methods=['POST'])
 def chatbot_response():
-    import openai
+    # Import OpenAI within the function to avoid using it before app initialization
+    from openai import OpenAI
 
-    # Set OpenAI API key here (It's better to get it from your config)
-    openai.api_key = app.config['OPENAI_API_KEY']
+    # Initialize the OpenAI client here using the API key from app's config
+    client = OpenAI(api_key=app.config['OPENAI_API_KEY'])
 
     # Extract the message from the POST request
     data = request.get_json()
     user_message = data['message']
 
     try:
-        # Make a call to OpenAI API with the user's message using GPT-4
-        response = openai.Completion.create(
-            model=app.config['OPENAI_ENGINE'],  # Ensure this is set to 'gpt-4' in your Config
-            prompt=user_message,
-            max_tokens=100,
-            temperature=0.7  # Adjust based on the desired creativity
-        )
-
+        # Make a call to OpenAI API with the user's message
+        response = client.chat.completions.create(model=app.config['OPENAI_ENGINE'], 
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": user_message}
+        ])
         # Extract the text of the response
-        bot_response = response.choices[0].text.strip() if response.choices else "I'm not sure how to respond to that."
+        bot_response = response.choices[0].message.content.strip() if response.choices else "I'm not sure how to respond to that."
     except Exception as e:
         # Handle exceptions, such as errors in communicating with OpenAI API
         print(f"Error while calling OpenAI API: {e}")
