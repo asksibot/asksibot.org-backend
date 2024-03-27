@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AskSibot Landing Page</title>
+    <style>
+        /* Your existing styles */
+        /* Additional styles for image generation */
+        #generatedImages {
+            margin-top: 20px;
+        }
+        #generatedImages img {
+            max-width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="https://assets.zyrosite.com/m5K2oKRrnPiy8bQj/asksiboticon-YD0Dx5DWaOcbxnEb.png" alt="AskSibot Icon">
+        <h1>Asksibot</h1>
+        <p>Developed on OpenAI by Christopher Horne, OTR/L</p>
+    </div>
+    <div class="chat-area" id="chatArea"></div>
+    <div class="input-container">
+        <input type="text" id="userMessageInput" placeholder="Ask Asksibot a question..." autocomplete="off">
+        <button id="sendMessageButton">Send</button>
+        <!-- Input for image prompt -->
+        <input type="text" id="imagePromptInput" placeholder="Enter image prompt..." autocomplete="off">
+        <button id="generateImageButton">Generate Image</button>
+    </div>
+    <!-- Container to display generated images -->
+    <div id="generatedImages"></div>
+    <div class="footer">
+        <p>An Occupational Therapy ChatGPT specializing in neurodiversity and sensory challenges.<br>
+        <span class="small-text">ChatGPTs can make mistakes. Consider checking important information.</span></p>
+    </div>
+    <button id="showFeedbackForm" style="margin-top: 20px;">Feedback</button>
+</div>
+
+<script>
+    /* Existing chat functionality script */
+    document.getElementById('generateImageButton').addEventListener('click', async function() {
+        const prompt = document.getElementById('imagePromptInput').value;
+        if (!prompt.trim()) return;
+        try {
+            const response = await fetch('/generate-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: prompt })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                displayGeneratedImage(data.image_url);
+            } else {
+                console.error('Error:', response.statusText);
+                // Optionally, display an error message to the user
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            // Optionally, display an error message to the user
+        }
+        // Clear the input field
+        document.getElementById('imagePromptInput').value = '';
+    });
+
+    function displayGeneratedImage(imageUrl) {
+        const imagesContainer = document.getElementById('generatedImages');
+        const imgElement = document.createElement('img');
+        imgElement.src = imageUrl;
+        imagesContainer.appendChild(imgElement);
+    }
+</script>
+</body>
+</html>
