@@ -24,17 +24,18 @@ def create_app():
     def chatbot():
         user_message = request.json.get('message', '')
         
-        from openai import OpenAI
-        
-        client = OpenAI(api_key=app.config['OPENAI_API_KEY'])
+        import openai
+        openai.api_key = app.config['OPENAI_API_KEY']
 
-        response = client.chat.completions.create(model=app.config['OPENAI_ENGINE'],
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": user_message}
-        ])
+        response = openai.ChatCompletion.create(
+            model=app.config['OPENAI_ENGINE'],
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": user_message}
+            ]
+        )
 
-        answer = response.choices[0].message.content.strip() if response.choices else "I'm not sure how to respond to that."
+        answer = response.choices[0].message['content'].strip() if response.choices else "I'm not sure how to respond to that."
 
         return jsonify({'answer': answer})
 
