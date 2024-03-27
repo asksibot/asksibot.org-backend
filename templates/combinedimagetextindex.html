@@ -1,0 +1,202 @@
+<!DOCTYPE html> //Part 1: Head and Initial Body remains largely unchanged but sets the stage for adding more dynamic content handling in the script. 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AskSibot Landing Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .header img {
+            width: 50%;
+            margin-top: 20px;
+        }
+        .small-text {
+            font-size: 0.8em;
+        }
+        .chat-area {
+            margin-top: 20px;
+            text-align: left;
+            border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .user-message, .bot-message {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 5px;
+        }
+        .bot-message {
+            background-color: #e1f7d5;
+        }
+        .input-container {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .input-container input[type="text"] {
+            flex: 1;
+            padding: 10px;
+        }
+        .input-container button {
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        @media (max-width: 600px) {
+            .input-container button {
+                margin-left: 5px;
+            }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .message-anim {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="https://assets.zyrosite.com/m5K2oKRrnPiy8bQj/asksiboticon-YD0Dx5DWaOcbxnEb.png" alt="AskSibot Icon">
+        <h1>Asksibot</h1>
+        <p>Developed on OpenAI by Christopher Horne, OTR/L</p>
+    </div>
+    <!-- Part 2 Placeholder for next part -->
+       <!-- Input area for text and image generation -->
+    <div class="input-container">
+        <input type="text" id="userMessageInput" placeholder="Ask Asksibot a question or request an image..." autocomplete="off">
+        <select id="promptType">
+            <option value="text">Text</option>
+            <option value="image">Image</option>
+        </select>
+        <button id="sendMessageButton">Send</button>
+    </div>
+    <div class="footer">
+        <p>An Occupational Therapy ChatGPT specializing in neurodiversity and sensory challenges.<br>
+        <span class="small-text">ChatGPTs can make mistakes. Consider checking important information.</span></p>
+    </div>
+    <button id="showFeedbackForm" style="margin-top: 20px;">Feedback</button>
+</div>
+
+<!-- Initial script setup -->
+<script>
+    document.getElementById('showFeedbackForm').addEventListener('click', function() {
+        window.location.href = 'feedback_form.html';
+    });
+
+    document.getElementById('sendMessageButton').addEventListener('click', async function() {
+        const userMessage = document.getElementById('userMessageInput').value;
+        const promptType = document.getElementById('promptType').value;
+
+        if (!userMessage.trim()) return;
+
+        // Append the user message to the chat area
+        appendMessage('You', userMessage, 'user-message');
+
+        // Check if it's a text or image prompt and handle accordingly
+        if (promptType === 'text') {
+            handleTextPrompt(userMessage);
+        } else if (promptType === 'image') {
+            handleImagePrompt(userMessage);
+        }
+
+        // Clear the input field
+        document.getElementById('userMessageInput').value = '';
+    });
+
+    document.getElementById('userMessageInput').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            document.getElementById('sendMessageButton').click();
+        }
+    });
+
+    function appendMessage(sender, message, className) {
+        const chatArea = document.getElementById('chatArea');
+        const messageElement = document.createElement('div');
+        messageElement.textContent = `${sender}: ${message}`;
+        messageElement.classList.add(className, 'message-anim');
+        chatArea.appendChild(messageElement);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    // Placeholder for handleTextPrompt and handleImagePrompt functions
+ 
+    // Existing setup and functions remain unchanged
+
+    async function handleTextPrompt(userMessage) {
+        try {
+            const response = await fetch('/chatbot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: userMessage })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const botResponse = data.bot_response;
+                appendMessage('Bot', botResponse, 'bot-message');
+            } else {
+                console.error('Error:', response.statusText);
+                appendMessage('Bot', 'Sorry, I am having trouble understanding that.', 'bot-message');
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            appendMessage('Bot', 'Sorry, I am having trouble understanding that.', 'bot-message');
+        }
+    }
+
+    async function handleImagePrompt(prompt) {
+        try {
+            const response = await fetch('/generate-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: prompt })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const imageUrl = data.image_url;
+                appendImage(imageUrl);
+            } else {
+                console.error('Error:', response.statusText);
+                appendMessage('Bot', 'Failed to generate image.', 'bot-message');
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            appendMessage('Bot', 'Failed to generate image.', 'bot-message');
+        }
+    }
+
+    function appendImage(imageUrl) {
+        const chatArea = document.getElementById('chatArea');
+        const imageElement = document.createElement('img');
+        imageElement.src = imageUrl;
+        imageElement.style.maxWidth = '100%';
+        imageElement.classList.add('message-anim');
+        chatArea.appendChild(imageElement);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }   
+</script>
+</body>
+</html>
+ 
