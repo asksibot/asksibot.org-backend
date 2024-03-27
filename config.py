@@ -10,8 +10,8 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME', 'feedback@asksibot.com')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', 'MexicoCity@2024')
     MAIL_USE_SSL = True
-    OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', 'sk-q0POrG6WEWNKxMAiwuq8T3BlbkFJCZ59p9BTcfndT4AY8qdBS')
-    OPENAI_ENGINE = os.environ.get('OPENAI_ENGINE', 'text-davinci-003')
+    OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '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') #changed key 3-27-2024
+    OPENAI_ENGINE = os.environ.get('OPENAI_ENGINE', 'gpt-4') #change to GPT-4
 
 def create_app():
     app = Flask(__name__)
