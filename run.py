@@ -1,9 +1,12 @@
 from flask import render_template, request, jsonify
+# Ensure the import path matches the location of your create_app function
 from config import create_app
-import openai
+from openai import OpenAI
 
-# Initialize Flask application and Flask-Mail (if used)
-app, mail = create_app()
+client = OpenAI(api_key=app.config['OPENAI_API_KEY'])
+
+# Initialize Flask application
+app = create_app()
 
 @app.route('/')
 def home():
@@ -16,22 +19,22 @@ def chatbot_response():
     user_message = data['message']
 
     # Ensure you have your OpenAI API key set in your Flask app's config
-    openai.api_key = app.config['OPENAI_API_KEY']
 
     try:
         # Make a call to OpenAI API with the user's message
-        response = openai.Completion.create(
-            engine=app.config['OPENAI_ENGINE'],  # Use the engine set in config
-            prompt=user_message,
-            max_tokens=150
-        )
-        # Extract the text of the first response
-        bot_response = response.choices[0].text.strip()
-        return jsonify({'bot_response': bot_response})
+        response = client.chat.completions.create(model=app.config['OPENAI_ENGINE'],  # Use the engine set in config
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": user_message}
+        ])
+        # Extract the text of the response
+        bot_response = response.choices[0].message.content.strip() if response.choices else "I'm not sure how to respond to that."
     except Exception as e:
         # Handle exceptions, such as errors in communicating with OpenAI API
         print(f"Error while calling OpenAI API: {e}")
-        return jsonify({'bot_response': 'Sorry, I am having trouble understanding that.'}), 500
+        bot_response = 'Sorry, I am having trouble understanding that.'
+
+    return jsonify({'bot_response': bot_response})
 
 # Run the Flask application
 if __name__ == '__main__':
