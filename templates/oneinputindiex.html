@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AskSibot Landing Page</title>
+    <style>
+        /* Your existing styles */
+        /* Ensure styles are responsive and suitable for both text and images */
+        #generatedImages img {
+            max-width: 100%;
+            margin-top: 10px;
+        }
+        /* Responsive styling */
+        @media (max-width: 768px) {
+            .input-container input[type="text"] {
+                padding: 8px;
+            }
+            .input-container button {
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Your existing HTML structure -->
+    <div class="chat-area" id="chatArea"></div>
+    <div class="input-container">
+        <input type="text" id="userMessageInput" placeholder="Ask Asksibot a question or 'Generate image: [description]' for images..." autocomplete="off">
+        <button id="sendMessageButton">Send</button>
+    </div>
+    <div id="generatedImages"></div>
+    <!-- Your existing HTML structure continues -->
+</div>
+
+<script>
+    document.getElementById('sendMessageButton').addEventListener('click', async function() {
+        const userInput = document.getElementById('userMessageInput').value;
+        if (!userInput.trim()) return;
+
+        // Determine if the request is for text or image generation
+        if (userInput.toLowerCase().startsWith("generate image:")) {
+            const imagePrompt = userInput.slice("generate image:".length).trim();
+            generateImage(imagePrompt);
+        } else {
+            sendTextMessage(userInput);
+        }
+
+        document.getElementById('userMessageInput').value = ''; // Clear input field after sending
+    });
+
+    async function sendTextMessage(message) {
+        appendMessage('You', message, 'user-message');
+        // Your existing AJAX call to send the text message and display response
+    }
+
+    async function generateImage(prompt) {
+        appendMessage('You', prompt, 'user-message');
+        try {
+            const response = await fetch('/generate-image', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ prompt: prompt })
+            });
+            const data = await response.json();
+            displayGeneratedImage(data.image_url);
+        } catch (error) {
+            console.error('Error generating image:', error);
+            // Optionally display an error message
+        }
+    }
+
+    function appendMessage(sender, message, className) {
+        // Your existing function to append messages to chat area
+    }
+
+    function displayGeneratedImage(imageUrl) {
+        const imagesContainer = document.getElementById('generatedImages');
+        const imgElement = document.createElement('img');
+        imgElement.src = imageUrl;
+        imagesContainer.appendChild(imgElement);
+    }
+</script>
+</body>
+</html>
