@@ -1,5 +1,9 @@
-from flask import Flask, render_template, request, jsonify
+from flask import render_template, request, jsonify
+# Ensure the import path matches the location of your create_app function
 from config import create_app
+from openai import OpenAI
+
+client = OpenAI(api_key=app.config['OPENAI_API_KEY'])
 
 # Initialize Flask application
 app = create_app()
@@ -10,19 +14,15 @@ def home():
 
 @app.route('/chatbot', methods=['POST'])
 def chatbot_response():
-    # Import OpenAI within the function to avoid using it before app initialization
-    from openai import OpenAI
-
-    # Initialize the OpenAI client here using the API key from app's config
-    client = OpenAI(api_key=app.config['OPENAI_API_KEY'])
-
     # Extract the message from the POST request
     data = request.get_json()
     user_message = data['message']
 
+    # Ensure you have your OpenAI API key set in your Flask app's config
+
     try:
         # Make a call to OpenAI API with the user's message
-        response = client.chat.completions.create(model=app.config['OPENAI_ENGINE'], 
+        response = client.chat.completions.create(model=app.config['OPENAI_ENGINE'],  # Use the engine set in config
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": user_message}
