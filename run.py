@@ -21,7 +21,7 @@ def chatbot_response():
 
     try:
         # Make a call to OpenAI API with the user's message using GPT-4
-        response = client.completions.create(
+        response = client.chat.completions.create(
             model=app.config['OPENAI_ENGINE'],  # Ensure this is set to 'gpt-4' in your Config
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
